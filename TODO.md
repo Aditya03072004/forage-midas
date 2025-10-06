@@ -1,0 +1,2 @@
+- [x] Move task.html to src/main/resources/static/task.html
+- [x] Move style.css to src/main/resources/static/style.css

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Gaming Boot Screen</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="bootScreen">
+        <h1 id="bootMessage">Starting Windows Gaming...</h1>
+        <div id="progressBar" style="width: 300px; height: 20px; background-color: #333; border-radius: 10px; overflow: hidden;">
+            <div id="progressFill" style="height: 100%; background-color: #007bff; width: 0%; transition: width 0.1s;"></div>
+        </div>
+    </div>
+    <div id="settingsPanel">
+        <h3>Settings</h3>
+        <div class="setting-group">
+            <label for="bgColor">Background Color:</label>
+            <input type="color" id="bgColor" value="#000000">
+        </div>
+        <div class="setting-group">
+            <label for="textColor">Text Color:</label>
+            <input type="color" id="textColor" value="#ffffff">
+        </div>
+        <div class="setting-group">
+            <label for="fontSize">Font Size:</label>
+            <input type="text" id="fontSize" value="24px">
+        </div>
+        <div class="setting-group">
+            <label for="fontFamily">Font Family:</label>
+            <input type="text" id="fontFamily" value="Arial, sans-serif">
+        </div>
+        <div class="setting-group">
+            <label for="animation">Animation:</label>
+            <select id="animation">
+                <option value="fadeIn">Fade In</option>
+                <option value="slideIn">Slide In</option>
+                <option value="zoomIn">Zoom In</option>
+            </select>
+        </div>
+        <div class="setting-group">
+            <label for="duration">Duration (ms):</label>
+            <input type="number" id="duration" value="3000">
+        </div>
+        <div class="setting-group">
+            <label for="logoUrl">Logo URL:</label>
+            <input type="text" id="logoUrl" value="">
+        </div>
+        <div class="setting-group">
+            <label for="message">Message:</label>
+            <input type="text" id="message" value="Starting Windows Gaming...">
+        </div>
+        <div class="setting-group">
+            <label for="soundEnabled">Sound Enabled:</label>
+            <input type="checkbox" id="soundEnabled">
+        </div>
+        <div class="setting-group">
+            <label for="soundUrl">Sound URL:</label>
+            <input type="text" id="soundUrl" value="">
+        </div>
+        <div class="setting-group">
+            <label for="panelPosition">Panel Position:</label>
+            <select id="panelPosition">
+                <option value="bottom-right">Bottom Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="top-left">Top Left</option>
+            </select>
+        </div>
+        <div class="setting-group">
+            <label for="panelBgColor">Panel Background Color:</label>
+            <input type="color" id="panelBgColor" value="#333333">
+        </div>
+        <div class="setting-group">
+            <label for="panelTextColor">Panel Text Color:</label>
+            <input type="color" id="panelTextColor" value="#ffffff">
+        </div>
+        <div class="setting-group">
+            <label for="panelOpacity">Panel Opacity:</label>
+            <input type="range" id="panelOpacity" min="0" max="1" step="0.1" value="0.8">
+        </div>
+        <button onclick="applySettings()">Apply</button>
+        <button onclick="saveAsDefault()">Save as Default</button>
+        <button onclick="exportSettings()">Export Settings</button>
+        <input type="file" id="importFile" accept=".json" style="display: none;">
+        <button onclick="document.getElementById('importFile').click();">Import Settings</button>
+        <button onclick="resetToDefault()">Reset to Default</button>
+    </div>
+    <div id="mainContent">
+        <h1>Welcome to Windows Gaming!</h1>
+        <p>This is the main content after the boot screen.</p>
+    </div>
+
+    <script>
+        let defaultSettings = {
+            bootScreen: {
+                backgroundColor: '#000000',
+                textColor: '#ffffff',
+                fontSize: '24px',
+                fontFamily: 'Arial, sans-serif',
+                animation: 'fadeIn',
+                duration: 3000,
+                logoUrl: '',
+                message: 'Starting Windows Gaming...',
+                soundEnabled: false,
+                soundUrl: ''
+            },
+            settingsPanel: {
+                position: 'bottom-right',
+                backgroundColor: '#333333',
+                textColor: '#ffffff',
+                opacity: 0.8
+            }
+        };
+
+        let currentSettings = { ...defaultSettings };
+
+        function loadSettings() {
+            try {
+                const savedSettings = localStorage.getItem('bootScreenSettings');
+                if (savedSettings) {
+                    currentSettings = JSON.parse(savedSettings);
+                    applySettings();
+                } else {
+                    fetch('data.json')
+                        .then(res => res.json())
+                        .then(data => {
+                            defaultSettings = { ...defaultSettings, ...data.settings };
+                            currentSettings = { ...defaultSettings };
+                            applySettings();
+                        })
+                        .catch(err => {
+                            console.error('Error loading settings:', err);
+                            currentSettings = { ...defaultSettings };
+                            applySettings();
+                        });
+                }
+            } catch (e) {
+                console.error('Error loading settings from localStorage:', e);
+                currentSettings = { ...defaultSettings };
+                applySettings();
+            }
+        }
+
+        function applySettings() {
+            // Apply boot screen settings
+            document.getElementById('bootScreen').style.backgroundColor = currentSettings.bootScreen.backgroundColor;
+            document.getElementById('bootMessage').style.color = currentSettings.bootScreen.textColor;
+            document.getElementById('bootMessage').style.fontSize = currentSettings.bootScreen.fontSize;
+            document.getElementById('bootMessage').style.fontFamily = currentSettings.bootScreen.fontFamily;
+            document.getElementById('bootMessage').textContent = currentSettings.bootScreen.message;
+
+            // Apply settings panel settings
+            const panel = document.getElementById('settingsPanel');
+            panel.style.backgroundColor = `rgba(${hexToRgb(currentSettings.settingsPanel.backgroundColor)}, ${currentSettings.settingsPanel.opacity})`;
+            panel.style.color = currentSettings.settingsPanel.textColor;
+            updatePanelPosition(currentSettings.settingsPanel.position);
+
+            // Update form values
+            document.getElementById('bgColor').value = currentSettings.bootScreen.backgroundColor;
+            document.getElementById('textColor').value = currentSettings.bootScreen.textColor;
+            document.getElementById('fontSize').value = currentSettings.bootScreen.fontSize;
+            document.getElementById('fontFamily').value = currentSettings.bootScreen.fontFamily;
+            document.getElementById('animation').value = currentSettings.bootScreen.animation;
+            document.getElementById('duration').value = currentSettings.bootScreen.duration;
+            document.getElementById('logoUrl').value = currentSettings.bootScreen.logoUrl;
+            document.getElementById('message').value = currentSettings.bootScreen.message;
+            document.getElementById('soundEnabled').checked = currentSettings.bootScreen.soundEnabled;
+            document.getElementById('soundUrl').value = currentSettings.bootScreen.soundUrl;
+            document.getElementById('panelPosition').value = currentSettings.settingsPanel.position;
+            document.getElementById('panelBgColor').value = currentSettings.settingsPanel.backgroundColor;
+            document.getElementById('panelTextColor').value = currentSettings.settingsPanel.textColor;
+            document.getElementById('panelOpacity').value = currentSettings.settingsPanel.opacity;
+        }
+
+        function updatePanelPosition(position) {
+            const panel = document.getElementById('settingsPanel');
+            panel.style.position = 'fixed';
+            switch (position) {
+                case 'bottom-right':
+                    panel.style.bottom = '20px';
+                    panel.style.right = '20px';
+                    panel.style.top = 'auto';
+                    panel.style.left = 'auto';
+                    break;
+                case 'bottom-left':
+                    panel.style.bottom = '20px';
+                    panel.style.left = '20px';
+                    panel.style.top = 'auto';
+                    panel.style.right = 'auto';
+                    break;
+                case 'top-right':
+                    panel.style.top = '20px';
+                    panel.style.right = '20px';
+                    panel.style.bottom = 'auto';
+                    panel.style.left = 'auto';
+                    break;
+                case 'top-left':
+                    panel.style.top = '20px';
+                    panel.style.left = '20px';
+                    panel.style.bottom = 'auto';
+                    panel.style.right = 'auto';
+                    break;
+            }
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+        }
+
+        function saveAsDefault() {
+            const dataStr = JSON.stringify({ settings: currentSettings }, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const exportFileDefaultName = 'data.json';
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            alert('Settings exported as data.json! Replace the old data.json with this file to make it default.');
+        }
+
+        function exportSettings() {
+            const dataStr = JSON.stringify({ settings: currentSettings }, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const exportFileDefaultName = 'settings.json';
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function importSettings(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.settings) {
+                            currentSettings = { ...defaultSettings, ...data.settings };
+                            applySettings();
+                            alert('Settings imported successfully!');
+                        } else {
+                            alert('Invalid settings file format.');
+                        }
+                    } catch (err) {
+                        alert('Error parsing settings file.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function resetToDefault() {
+            currentSettings = { ...defaultSettings };
+            applySettings();
+        }
+
+        document.getElementById('importFile').addEventListener('change', importSettings);
+
+        // Boot screen animation
+        function startBootScreen() {
+            const bootScreen = document.getElementById('bootScreen');
+            const progressFill = document.getElementById('progressFill');
+            const duration = currentSettings.bootScreen.duration;
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressFill.style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        bootScreen.style.display = 'none';
+                        document.getElementById('mainContent').style.display = 'block';
+                    }, 500);
+                }
+            }, duration / 10);
+        }
+
+        // Load settings on page load
+        window.onload = function() {
+            loadSettings();
+            setTimeout(startBootScreen, 1000); // Start boot screen after settings load
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+    "settings": {
+        "bootScreen": {
+            "backgroundColor": "#000000",
+            "textColor": "#ffffff",
+            "fontSize": "24px",
+            "fontFamily": "Arial, sans-serif",
+            "animation": "fadeIn",
+            "duration": 3000,
+            "logoUrl": "",
+            "message": "Starting Windows Gaming...",
+            "soundEnabled": false,
+            "soundUrl": ""
+        },
+        "settingsPanel": {
+            "position": "bottom-right",
+            "backgroundColor": "#333333",
+            "textColor": "#ffffff",
+            "opacity": 0.8
+        }
+    }
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - User Grades</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel - User Grades</h1>
+    <button onclick="addRow()">Add New User</button>
+    <button onclick="saveData()">Save Data</button>
+    <table id="gradesTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Module</th>
+                <th>Grade</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        function addRow() {
+            const table = document.getElementById('gradesTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Enter name"></td>
+                <td><input type="text" placeholder="Enter surname"></td>
+                <td><input type="text" placeholder="Enter module"></td>
+                <td><input type="text" placeholder="Enter grade"></td>
+                <td><button class="delete-btn" onclick="deleteRow(this)">Delete</button></td>
+            `;
+        }
+
+        function deleteRow(button) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        function saveData() {
+            const table = document.getElementById('gradesTable');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            const data = [];
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                const rowData = {
+                    name: cells[0].getElementsByTagName('input')[0].value,
+                    surname: cells[1].getElementsByTagName('input')[0].value,
+                    module: cells[2].getElementsByTagName('input')[0].value,
+                    grade: cells[3].getElementsByTagName('input')[0].value
+                };
+                data.push(rowData);
+            }
+            console.log('Saved data:', data);
+            alert('Data saved! Check console for details.');
+            // Here you could send the data to a server or save locally
+        }
+
+        // Load existing data if any (for demonstration, add a sample row)
+        window.onload = function() {
+            addRow();
+        };
+    </script>
+</body>
+</html>
